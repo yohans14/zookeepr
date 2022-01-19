@@ -1,10 +1,13 @@
 const fs = require("fs");
 const path = require("path");
-const { animals } = require("./data/animals");
 const express = require("express");
+const { animals } = require("./data/animals");
 
 const PORT = process.env.PORT || 3001;
 const app = express();
+
+app.use(express.static("public"));
+
 // parse incoming string or array data
 app.use(express.urlencoded({ extended: true }));
 // parse incoming JSON data
@@ -58,6 +61,17 @@ function findById(id, animalsArray) {
   const result = animalsArray.filter((animal) => animal.id === id)[0];
   return result;
 }
+
+function createNewAnimal(body, animalsArray) {
+  const animal = body;
+  animalsArray.push(animal);
+  fs.writeFileSync(
+    path.join(__dirname, "./data/animals.json"),
+    JSON.stringify({ animals: animalsArray }, null, 2)
+  );
+  return animal;
+}
+
 function validateAnimal(animal) {
   if (!animal.name || typeof animal.name !== "string") {
     return false;
@@ -72,15 +86,6 @@ function validateAnimal(animal) {
     return false;
   }
   return true;
-}
-function createNewAnimal(body, animalsArray) {
-  const animal = body;
-  animalsArray.push(animal);
-  fs.writeFileSync(
-    path.join(__dirname, "./data/animals.json"),
-    JSON.stringify({ animals: animalsArray }, null, 2)
-  );
-  return animal;
 }
 
 app.get("/api/animals", (req, res) => {
@@ -100,10 +105,6 @@ app.get("/api/animals/:id", (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`API server now on port ${PORT}!`);
-});
-
 app.post("/api/animals", (req, res) => {
   // set id based on what the next index of the array will be
   req.body.id = animals.length.toString();
@@ -116,4 +117,21 @@ app.post("/api/animals", (req, res) => {
     const animal = createNewAnimal(req.body, animals);
     res.json(animal);
   }
+});
+//root rought
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "./public/index.html"));
+});
+app.get("/animals", (req, res) => {
+  res.sendFile(path.join(__dirname, "./public/animals.html"));
+});
+app.get("/zookeepers", (req, res) => {
+  res.sendFile(path.join(__dirname, "./public/zookeepers.html"));
+});
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "./public/index.html"));
+});
+
+app.listen(PORT, () => {
+  console.log(`API server now on port ${PORT}!`);
 });

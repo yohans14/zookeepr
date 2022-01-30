@@ -4,8 +4,8 @@ const {
   findById,
   createNewZookeeper,
   validateZookeeper,
-} = require("../../lib/zookeepers");
-const { zookeepers } = require("../../data/zookeepers");
+} = require("../../lib/zookeeper");
+const { zookeepers } = require("../../data/zookeepers.json");
 
 router.get("/zookeepers", (req, res) => {
   let results = zookeepers;
